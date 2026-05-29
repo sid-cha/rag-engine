@@ -1,24 +1,23 @@
-from pydantic import field_validator
 from pydantic_settings import BaseSettings
-from typing import List
+import json
 
 
 class Settings(BaseSettings):
     # App
     APP_NAME: str = "RAG Knowledge Search Engine"
     DEBUG: bool = False
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "https://sid-cha.github.io",
-        "https://rag-engine-sid-cha.vercel.app",
-    ]
+    ALLOWED_ORIGINS: str = (
+        "http://localhost:3000,"
+        "https://sid-cha.github.io,"
+        "https://rag-engine-sid-cha.vercel.app"
+    )
 
-    @field_validator("ALLOWED_ORIGINS", mode="before")
-    @classmethod
-    def parse_allowed_origins(cls, v):
-        if isinstance(v, str):
-            return [url.strip() for url in v.split(",")]
-        return v
+    @property
+    def allowed_origins(self) -> list[str]:
+        value = self.ALLOWED_ORIGINS.strip()
+        if value.startswith("["):
+            return [str(url).strip() for url in json.loads(value) if str(url).strip()]
+        return [url.strip() for url in value.split(",") if url.strip()]
 
     # OpenAI
     OPENAI_API_KEY: str = ""

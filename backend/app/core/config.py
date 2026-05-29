@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from typing import List
 
@@ -12,12 +13,12 @@ class Settings(BaseSettings):
         "https://rag-engine-sid-cha.vercel.app",
     ]
 
-    def model_post_init(self, __context) -> None:
-        # Allow overriding via ALLOWED_ORIGINS="url1,url2" env var
-        import os
-        raw = os.getenv("ALLOWED_ORIGINS")
-        if raw:
-            object.__setattr__(self, "ALLOWED_ORIGINS", [u.strip() for u in raw.split(",")])
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, v):
+        if isinstance(v, str):
+            return [url.strip() for url in v.split(",")]
+        return v
 
     # OpenAI
     OPENAI_API_KEY: str = ""

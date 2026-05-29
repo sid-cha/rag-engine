@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: rag-engine-backend
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false          # you enter this manually in Render dashboard
+      - key: VECTOR_DB
+        value: chroma
+      - key: CHROMA_PATH
+        value: /app/data/chroma
+      - key: ALLOWED_ORIGINS
+        value: "http://localhost:3000,https://rag-engine-sid-cha.vercel.app,https://sid-cha.github.io"
